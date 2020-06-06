@@ -1,0 +1,754 @@
+/*
+<metadata description="Turn your lightpads into a tactile midi control surface.">
+    <groups>
+        <group name="g"     displayName="Global" />
+        <group name="t0"    displayName="Track 1" />
+        <group name="t1"    displayName="Track 2" />
+        <group name="t2"    displayName="Track 3" />
+        <group name="t3"    displayName="Track 4" />
+        <group name="t4"    displayName="Track 5" />
+	</groups>
+    <variables>
+    
+        <variable group="g"  name="bpm"     displayName="BPM"                   type="int"   min="1" max="180" value="90" />
+    
+        <variable group="t0" name="t0_ch"   displayName="Track 1 Midi Channel"  type="int"   min="0" max="16"  value="2"  />
+        <variable group="t1" name="t1_ch"   displayName="Track 2 Midi Channel"  type="int"   min="0" max="16"  value="2"  />
+        <variable group="t2" name="t2_ch"   displayName="Track 3 Midi Channel"  type="int"   min="0" max="16"  value="2"  />
+        <variable group="t3" name="t3_ch"   displayName="Track 4 Midi Channel"  type="int"   min="0" max="16"  value="2"  />
+        <variable group="t4" name="t4_ch"   displayName="Track 5 Midi Channel"  type="int"   min="0" max="16"  value="2"  />
+        
+        <variable group="t0" name="t0_note" displayName="Track 1 Note"  type="midiNote" min="C-2" max="E7" value="C#3" />
+        <variable group="t1" name="t1_note" displayName="Track 2 Note"  type="midiNote" min="C-2" max="E7" value="E3"  />
+        <variable group="t2" name="t2_note" displayName="Track 3 Note"  type="midiNote" min="C-2" max="E7" value="G#3" />
+        <variable group="t3" name="t3_note" displayName="Track 4 Note"  type="midiNote" min="C-2" max="E7" value="B3" />
+        <variable group="t4" name="t4_note" displayName="Track 5 Note"  type="midiNote" min="C-2" max="E7" value="D#4"  />
+
+	</variables>
+</metadata>
+*/
+
+const int GMSG_ADVANCE = 118;
+const int MSG_VELOCITY = 148;
+const int MSG_POSITION = 149;
+const int MSG_TRACKLEN = 150;
+const int MSG_ENDMRKER = 151;
+const int MSG_ENOSLIDE = 152;
+
+const int maxVerticalBlocks = 10;
+const int numTracks = 5;
+const int maxHorizontalBlocks = 10;
+const int numPositionsPerBlock = 5;
+const int maxTrackLength = maxHorizontalBlocks * numPositionsPerBlock;
+
+const int HEAP_velocity = 0;
+const int HEAP_trackLength = HEAP_velocity + (numTracks * maxTrackLength);
+const int HEAP_trackPosition = HEAP_trackLength + numTracks;
+const int HEAP_note = HEAP_trackPosition + numTracks;
+
+#heapsize: 510
+
+/*
+
+      0    1 byte x numTracks X maxTrackLength   track::position::velocity
+    250    1 byte X numTracks                    track::length
+    255    1 byte X numTracks                    track::position
+    260    1 byte x numTracks X maxTrackLength   track::position::note
+    510
+
+*/
+
+void setVelocity(int track, int position, int value) 
+{ 
+    setHeapByte(HEAP_velocity+(track*maxTrackLength)+position, value); 
+}
+int getVelocity(int track, int position)             
+{ 
+    return getHeapByte(HEAP_velocity+(track*maxTrackLength)+position); 
+}
+
+void setTrackLength(int track, int value) 
+{ 
+    setHeapByte(HEAP_trackLength+track, value); 
+}
+int getTrackLength(int track)             
+{ 
+    return getHeapByte(HEAP_trackLength+track); 
+}
+
+void setPosition(int track, int value) 
+{ 
+    setHeapByte(HEAP_trackPosition+track, value); 
+}
+int getPosition(int track)             
+{ 
+    return getHeapByte(HEAP_trackPosition+track); 
+}
+
+void setNote(int track, int position, int value) 
+{ 
+    setHeapByte(HEAP_note+(track*maxTrackLength)+position, value); 
+}
+int getNote(int track, int position)             
+{ 
+    return getHeapByte(HEAP_note+(track*maxTrackLength)+position); 
+}
+
+
+bool isPlaying;
+int globalCounter;
+int counter;
+int lastTime;
+float interval;
+
+
+int trackToNote(int track)
+{
+    if(track == 0) { return t0_note; }
+    if(track == 1) { return t1_note; }
+    if(track == 2) { return t2_note; }
+    if(track == 3) { return t3_note; }
+    return t4_note;
+}
+
+void initialise()
+{   
+    for (int i = 0; i < 32; ++i)
+        setLocalConfigActiveState (i, false, false);
+        
+    clearDisplay();
+
+    sendCC (0, 120, 127); // All Sound Off
+    
+    setAutoRotate(true);
+    isPlaying = true;
+    globalCounter = 0;
+    counter = 0;
+    lastTime = getMillisecondCounter();
+    interval = 60000.0/float(bpm); 
+    
+    for(int t = 0; t < numTracks; ++t)
+    {
+        for(int n = 0; n < numPositionsPerBlock*getClusterWidth(); ++n)
+        {
+            setVelocity(t, (getClusterXpos()*numPositionsPerBlock)+n, 0);
+            setNote(t, (getClusterXpos()*numPositionsPerBlock)+n, trackToNote(t));
+        }
+        setTrackLength(t, getClusterWidth()*numPositionsPerBlock);
+        setPosition(t, 0);
+    }
+}
+
+void advance()
+{
+    if(getClusterXpos() == 0 && getClusterYpos() == 0)
+    {
+        if (isPlaying == true)
+        {        
+            if (getMillisecondCounter() - lastTime > interval)
+            {
+                lastTime = getMillisecondCounter();
+                globalCounter += 1;
+                broadcastGlobal(GMSG_ADVANCE, globalCounter, 0);
+            }
+        }  
+    }
+    while(counter < globalCounter)
+    {
+        step();
+        counter += 1;
+    }
+    	
+}
+
+
+void step()
+{
+    if(getClusterXpos() == 0)
+    {
+        for(int t = 0; t < numTracks; ++t)
+        {
+            int note = getNote(t, newPosition);
+            
+            int trackLength = getTrackLength(t);
+            int initialPosition = getPosition(t);
+            
+            sendNoteOff(2, note, 0);
+            
+            int newPosition;         
+            if(trackLength == 0)
+            {
+                newPosition = -1;    
+            }
+            else 
+            {
+                newPosition = max(initialPosition,0) < trackLength-1 ? initialPosition+1 : 0;
+            }         
+            
+            setPosition(t, newPosition);       
+            broadcastMessageToRow(MSG_POSITION, t, newPosition);
+            
+            int velocity = getVelocity(t, newPosition);
+            if(velocity > 0)
+            {
+                sendNoteOn(2, note, velocity);    
+            }            
+        }        
+    }
+}
+
+void broadcastGlobal(int messageType, int p1, int p2)
+{
+    int globalMessageType = messageType*-1;
+    
+    for(int b = 0; b < getNumBlocksInCurrentCluster(); ++b)
+    {
+        int blockId = getBlockIDForIndex(b);
+        if(blockId == getClusterIndex())
+        {
+            continue;    
+        }
+        sendMessageToBlock(blockId, globalMessageType, p1, p2);
+    }
+}
+
+void broadcastMessageToRow(int messageType, int p1, int p2)
+{
+    int rowAndMessageType = (getClusterYpos()*1000)+messageType;
+    
+    for(int b = 0; b < getNumBlocksInCurrentCluster(); ++b)
+    {
+        int blockId = getBlockIDForIndex(b);
+        if(blockId == getClusterIndex())
+        {
+            continue;    
+        }
+        sendMessageToBlock(blockId, rowAndMessageType, p1, p2);
+    }
+}
+
+void handleMessage(int rowAndMessageType, int p2, int p3)
+{
+    if(rowAndMessageType < 0) // GLOBAL
+    {
+        int messageType = rowAndMessageType * -1;
+        if(messageType == GMSG_ADVANCE)
+        {
+            globalCounter = p2;
+        }        
+        return;
+    }   
+    
+    
+    int clusterRow = rowAndMessageType/1000;
+    if(clusterRow != getClusterYpos())
+    {
+        return;
+    }
+    
+    int messageType = rowAndMessageType % 1000;
+    
+    if(messageType == MSG_VELOCITY)
+    {
+        int track = p2/1000;
+        int position = p2 % 1000;
+        setVelocity(track, position, p3);
+    }
+    if(messageType == MSG_POSITION)
+    {
+        setPosition(p2, p3);
+    }
+    if(messageType == MSG_TRACKLEN)
+    {
+        setTrackLength(p2, p3);
+    }
+    if(messageType == MSG_ENDMRKER)
+    {
+        endMarkerMove[p2] = p3;
+    }
+    if(messageType == MSG_ENOSLIDE)
+    {
+        endMarkerNoSlide[p2] = p3;
+    }
+}    
+
+
+int trackIndexToY(int trackIndex)
+{
+    if(trackIndex == 0){ return 1; }        
+    if(trackIndex == 1){ return 4; }
+    if(trackIndex == 2){ return 7; }
+    if(trackIndex == 3){ return 10; }
+    else { return 13; }
+}
+
+int yToTrackIndex(float y)
+{
+    if(y <= 3.3)             { return 0; }        
+    if(y >= 3.7 && y <= 6.3) { return 1; }
+    if(y >= 6.7 && y <= 9.3) { return 2; }
+    if(y >= 9.7 && y <= 12.3){ return 3; }
+    if(y >= 12.7)            { return 4; }
+    log(00000);
+    return -1;
+}
+
+int xToPos(float x)
+{
+    int offset = getClusterXpos()*numPositionsPerBlock;
+    if(x <= 2.4)              { return offset; }        
+    if(x >= 2.6 && x <= 5.4)  { return 1+offset; }
+    if(x >= 5.6 && x <= 8.4)  { return 2+offset; }
+    if(x >= 8.6 && x <= 11.4) { return 3+offset; }
+    if(x >= 11.6 && x <= 14.4){ return 4+offset; }
+    
+    return 5+offset;
+}
+
+int xToEndMarkerPos(float x)
+{
+    int offset = getClusterXpos()*numPositionsPerBlock;
+    if(x <= 1.5)  { return offset; }        
+    if(x <= 4.5 ) { return 1+offset; }
+    if(x <= 7.5)  { return 2+offset; }
+    if(x <= 10.5) { return 3+offset; }
+    if(x <= 13.5) { return 4+offset; }
+    return 5+offset;
+}
+
+bool isPixelCurrent(int track, int pixel)
+{ 
+    int position = getPosition(track);
+    int pixelPosition = pixel+(getClusterXpos()*15)-2;
+    return position * 3 > pixelPosition 
+        && (position * 3) -3 < pixelPosition;
+}
+
+int posToX(int pos)
+{
+    int blockX = getClusterXpos();
+    if(blockX == 0 && pos <= numPositionsPerBlock)   { return pos*3; }
+    if(blockX == 1 && pos <= numPositionsPerBlock*2) { return (pos-numPositionsPerBlock)*3; }
+    if(blockX == 2 && pos <= numPositionsPerBlock*3) { return (pos-numPositionsPerBlock*2)*3; }
+    if(blockX == 3 && pos <= numPositionsPerBlock*4) { return (pos-numPositionsPerBlock*3)*3; }
+    if(blockX == 4 && pos <= numPositionsPerBlock*5) { return (pos-numPositionsPerBlock*4)*3; }
+    return 255;
+}
+
+void repaint()
+{    
+    advance();
+    clearDisplay();
+
+    int noColour = makeARGB(0, 0, 0, 0);
+    int laneNext = makeARGB(50, 0, 4, 4);
+    int laneBright = makeARGB(50, 20, 50, 50);
+    int laneVBright = makeARGB(200, 100, 200, 200);
+    int laneDim = makeARGB(1, 0, 2, 2);
+    int laneVDim = makeARGB(0, 0, 1, 1);
+    
+    int endDim = makeARGB(255, 10, 10, 40);
+    int endBright = makeARGB(255, 20, 2, 90);
+    
+    int noteColour = makeARGB(80, 0, 40, 90);
+    int noteColourDisabled = makeARGB(80, 0, 8, 15);
+    int noteColourActive = makeARGB(255, 0, 120, 255);
+    
+    // Lanes    
+    for(int t = 0; t < numTracks; ++t)
+    for(int n = 0; n < numPositionsPerBlock; ++n)
+    {
+        int y = trackIndexToY(t);
+        int pos = (getClusterXpos()*numPositionsPerBlock)+n;
+        
+        bool isCurrent = pos == getPosition(t);
+        bool isPastEnd = pos >= getTrackLength(t);
+        
+        fillRect(isPastEnd ? laneVDim : laneDim, (n*3), y-1, 3, 1);
+        fillRect(isPastEnd ? noColour : (isCurrent ? laneNext : laneDim), (n*3)+2,  y, 1, 4);
+        if(isCurrent)
+        {
+            fillRect(laneBright, (n*3),  y, 2, 2);    
+        }
+    }
+    
+    // Notes
+    for(int t = 0; t < numTracks; ++t)
+    for(int n = 0; n < numPositionsPerBlock; ++n)
+    {
+        int pos = (getClusterXpos()*numPositionsPerBlock)+n;
+        if(getVelocity(t, pos) > 0)
+        {
+            int colour = pos >= getTrackLength(t)
+                ? noteColourDisabled
+                : getPosition(t) == pos 
+                    ? noteColourActive
+                    : noteColour;
+                    
+            fillRect(colour, (n*3),  trackIndexToY(t), 2, 2);
+        }
+    }
+    
+    // Track End Markers
+    for(int t = 0; t < numTracks; ++t)   
+    {
+        int length = getTrackLength(t);
+        int x = posToX(length);
+        {
+            fillPixel(endBright, x-1, trackIndexToY(t));
+            fillPixel(endBright, x-1, trackIndexToY(t)+1);
+            fillPixel(endDim, x, trackIndexToY(t));
+            fillPixel(endDim, x, trackIndexToY(t)+1);
+        }
+    }
+    
+    //drawNumber(getClusterXpos(), makeARGB(255, 200, 200, 200), 1, 1);   
+    //drawNumber(getClusterYpos(), makeARGB(255, 200, 200, 200), 7, 1);
+    //drawNumber(counter, makeARGB(255, 200, 200, 200), 0, 7);
+    
+}
+
+bool isTrackEndMarker(int trk, float x)
+{
+    int length = getTrackLength(trk);
+    int pos = xToEndMarkerPos(x);    
+    return pos == length;
+}
+
+const int maxFingers = 10;
+
+int startPos[maxFingers];
+int startTrk[maxFingers];
+
+int endMarkerMove[numTracks];
+int endMarkerIndex[numTracks];
+int endMarkerNoSlide[numTracks];
+
+void touchStart (int i, float x, float y, float z, float vz)
+{      
+    int trk = yToTrackIndex(toPixelFloat(y));
+    
+    if(isTrackEndMarker(trk, toPixelFloat(x)))
+    {
+        endMarkerIndex[trk] = i;
+        endMarkerMove[trk] = 1;
+        endMarkerNoSlide[trk] = -1;
+        broadcastMessageToRow(MSG_ENOSLIDE, trk, -1);
+        broadcastMessageToRow(MSG_ENDMRKER, trk, 1);        
+        return;
+    }    
+    
+    int pos = xToPos(toPixelFloat(x));
+ 
+    if(trk < 0 || pos < 0)
+    {
+        return;
+    }        
+    
+    startPos[i] = pos;
+    startTrk[i] = trk;     
+}
+
+void touchMove (int i, float x, float y, float z, float vz)
+{
+    int trk = yToTrackIndex(toPixelFloat(y));
+    
+    if(trk < 0)
+    {
+        return;
+    }
+    
+    if(endMarkerMove[trk] > 0 && endMarkerIndex[trk] == i && endMarkerNoSlide[trk] < 0)
+    {
+        int mkrpos = xToEndMarkerPos(toPixelFloat(x));
+        int length = getTrackLength(trk);
+        if(mkrpos == length)
+        {
+            return;
+        }
+        setTrackLength(trk, mkrpos);
+        broadcastMessageToRow(MSG_TRACKLEN, trk, mkrpos);
+        return;
+    }
+
+}
+
+void touchEnd (int i, float x, float y, float z, float vz)
+{   
+    int trk = yToTrackIndex(toPixelFloat(y));    
+    if(trk < 0)
+    {
+        return;
+    }
+    
+    if(endMarkerMove[trk] > 0 && endMarkerIndex[trk] == i)
+    {
+        endMarkerIndex[trk] = -1;
+        endMarkerMove[trk] = -1;
+        endMarkerNoSlide[trk] = -1;
+        broadcastMessageToRow(MSG_ENOSLIDE, trk, -1);
+        broadcastMessageToRow(MSG_ENDMRKER, trk, -1);
+        return;
+    }
+    
+    if(endMarkerMove[trk] > 0)
+    {
+        int mkrpos = xToEndMarkerPos(toPixelFloat(x));
+        endMarkerNoSlide[trk] = true;
+        broadcastMessageToRow(MSG_ENOSLIDE, trk, 1);
+        setTrackLength(trk, mkrpos);
+        broadcastMessageToRow(MSG_TRACKLEN, trk, mkrpos);
+        return;
+    }
+    
+
+    int pos = xToPos(toPixelFloat(x));
+    if(pos < 0)
+    {
+        return;
+    }
+    if(pos == startPos[i])
+    {
+        int newVelocity = getVelocity(trk, pos) > 0 ? 0 : 127;
+        setVelocity(trk, pos, newVelocity);
+        broadcastMessageToRow(MSG_VELOCITY, (trk*1000) + pos, newVelocity);
+    }
+}
+
+float toPixelFloat(float pos)
+{
+    return pos*7.5;
+}
+
+
+/*
+<display backgroundColour="0xFF0B2D2F" textColour ="0xFF52DDFF">
+    <pixels>
+        <pixel index="0" colour="0xFF1687C1" />
+        <pixel index="1" colour="0xFF1687C1" />
+        <pixel index="2" colour="0xFF0B2D2F" />
+        <pixel index="3" colour="0xFF1A1814" />
+        <pixel index="4" colour="0xFF1A1814" />
+        <pixel index="5" colour="0xFF0B2D2F" />
+        <pixel index="6" colour="0xFF1A1814" />
+        <pixel index="7" colour="0xFF1A1814" />
+        <pixel index="8" colour="0xFF0B2D2F" />
+        <pixel index="9" colour="0xFF52DDFF" />
+        <pixel index="10" colour="0xFF52DDFF" />
+        <pixel index="11" colour="0xFF0B2D2F" />
+        <pixel index="12" colour="0xFF1A1814" />
+        <pixel index="13" colour="0xFF1A1814" />
+        <pixel index="14" colour="0xFF3208DA" />
+        <pixel index="15" colour="0xFF1687C1" />
+        <pixel index="16" colour="0xFF1687C1" />
+        <pixel index="17" colour="0xFF0B2D2F" />
+        <pixel index="18" colour="0xFF1A1814" />
+        <pixel index="19" colour="0xFF1A1814" />
+        <pixel index="20" colour="0xFF0B2D2F" />
+        <pixel index="21" colour="0xFF1A1814" />
+        <pixel index="22" colour="0xFF1A1814" />
+        <pixel index="23" colour="0xFF0B2D2F" />
+        <pixel index="24" colour="0xFF52DDFF" />
+        <pixel index="25" colour="0xFF52DDFF" />
+        <pixel index="26" colour="0xFF0B2D2F" />
+        <pixel index="27" colour="0xFF1A1814" />
+        <pixel index="28" colour="0xFF1A1814" />
+        <pixel index="29" colour="0xFF3208DA" />
+        <pixel index="30" colour="0xFF0B2D2F" />
+        <pixel index="31" colour="0xFF0B2D2F" />
+        <pixel index="32" colour="0xFF0B2D2F" />
+        <pixel index="33" colour="0xFF0B2D2F" />
+        <pixel index="34" colour="0xFF0B2D2F" />
+        <pixel index="35" colour="0xFF0B2D2F" />
+        <pixel index="36" colour="0xFF0B2D2F" />
+        <pixel index="37" colour="0xFF0B2D2F" />
+        <pixel index="38" colour="0xFF0B2D2F" />
+        <pixel index="39" colour="0xFF0B2D2F" />
+        <pixel index="40" colour="0xFF0B2D2F" />
+        <pixel index="41" colour="0xFF0B2D2F" />
+        <pixel index="42" colour="0xFF0B2D2F" />
+        <pixel index="43" colour="0xFF0B2D2F" />
+        <pixel index="44" colour="0xFF0B2D2F" />
+        <pixel index="45" colour="0xFF1A1814" />
+        <pixel index="46" colour="0xFF1A1814" />
+        <pixel index="47" colour="0xFF0B2D2F" />
+        <pixel index="48" colour="0xFF96B0B7" />
+        <pixel index="49" colour="0xFF96B0B7" />
+        <pixel index="50" colour="0xFF0B2D2F" />
+        <pixel index="51" colour="0xFF1687C1" />
+        <pixel index="52" colour="0xFF1687C1" />
+        <pixel index="53" colour="0xFF3208DA" />
+        <pixel index="54" colour="0xFF4220CB" />
+        <pixel index="55" colour="0xFF1A1814" />
+        <pixel index="56" colour="0xFF1A1814" />
+        <pixel index="57" colour="0xFF1A1814" />
+        <pixel index="58" colour="0xFF1A1814" />
+        <pixel index="59" colour="0xFF1A1814" />
+        <pixel index="60" colour="0xFF1A1814" />
+        <pixel index="61" colour="0xFF1A1814" />
+        <pixel index="62" colour="0xFF0B2D2F" />
+        <pixel index="63" colour="0xFF96B0B7" />
+        <pixel index="64" colour="0xFF96B0B7" />
+        <pixel index="65" colour="0xFF0B2D2F" />
+        <pixel index="66" colour="0xFF1687C1" />
+        <pixel index="67" colour="0xFF1687C1" />
+        <pixel index="68" colour="0xFF3208DA" />
+        <pixel index="69" colour="0xFF4220CB" />
+        <pixel index="70" colour="0xFF1A1814" />
+        <pixel index="71" colour="0xFF1A1814" />
+        <pixel index="72" colour="0xFF1A1814" />
+        <pixel index="73" colour="0xFF1A1814" />
+        <pixel index="74" colour="0xFF1A1814" />
+        <pixel index="75" colour="0xFF0B2D2F" />
+        <pixel index="76" colour="0xFF0B2D2F" />
+        <pixel index="77" colour="0xFF0B2D2F" />
+        <pixel index="78" colour="0xFF0B2D2F" />
+        <pixel index="79" colour="0xFF0B2D2F" />
+        <pixel index="80" colour="0xFF0B2D2F" />
+        <pixel index="81" colour="0xFF0B2D2F" />
+        <pixel index="82" colour="0xFF0B2D2F" />
+        <pixel index="83" colour="0xFF0B2D2F" />
+        <pixel index="84" colour="0xFF0B2D2F" />
+        <pixel index="85" colour="0xFF0B2D2F" />
+        <pixel index="86" colour="0xFF0B2D2F" />
+        <pixel index="87" colour="0xFF0B2D2F" />
+        <pixel index="88" colour="0xFF0B2D2F" />
+        <pixel index="89" colour="0xFF0B2D2F" />
+        <pixel index="90" colour="0xFF1687C1" />
+        <pixel index="91" colour="0xFF1687C1" />
+        <pixel index="92" colour="0xFF0B2D2F" />
+        <pixel index="93" colour="0xFF1A1814" />
+        <pixel index="94" colour="0xFF1A1814" />
+        <pixel index="95" colour="0xFF0B2D2F" />
+        <pixel index="96" colour="0xFF96B0B7" />
+        <pixel index="97" colour="0xFF96B0B7" />
+        <pixel index="98" colour="0xFF002123" />
+        <pixel index="99" colour="0xFF1A1814" />
+        <pixel index="100" colour="0xFF1A1814" />
+        <pixel index="101" colour="0xFF3208DA" />
+        <pixel index="102" colour="0xFF4220CB" />
+        <pixel index="103" colour="0xFF1A1814" />
+        <pixel index="104" colour="0xFF1A1814" />
+        <pixel index="105" colour="0xFF1687C1" />
+        <pixel index="106" colour="0xFF1687C1" />
+        <pixel index="107" colour="0xFF0B2D2F" />
+        <pixel index="108" colour="0xFF1A1814" />
+        <pixel index="109" colour="0xFF1A1814" />
+        <pixel index="110" colour="0xFF0B2D2F" />
+        <pixel index="111" colour="0xFF96B0B7" />
+        <pixel index="112" colour="0xFF96B0B7" />
+        <pixel index="113" colour="0xFF002123" />
+        <pixel index="114" colour="0xFF1A1814" />
+        <pixel index="115" colour="0xFF1A1814" />
+        <pixel index="116" colour="0xFF3208DA" />
+        <pixel index="117" colour="0xFF4220CB" />
+        <pixel index="118" colour="0xFF1A1814" />
+        <pixel index="119" colour="0xFF1A1814" />
+        <pixel index="120" colour="0xFF0B2D2F" />
+        <pixel index="121" colour="0xFF0B2D2F" />
+        <pixel index="122" colour="0xFF0B2D2F" />
+        <pixel index="123" colour="0xFF0B2D2F" />
+        <pixel index="124" colour="0xFF0B2D2F" />
+        <pixel index="125" colour="0xFF0B2D2F" />
+        <pixel index="126" colour="0xFF0B2D2F" />
+        <pixel index="127" colour="0xFF0B2D2F" />
+        <pixel index="128" colour="0xFF0B2D2F" />
+        <pixel index="129" colour="0xFF0B2D2F" />
+        <pixel index="130" colour="0xFF0B2D2F" />
+        <pixel index="131" colour="0xFF0B2D2F" />
+        <pixel index="132" colour="0xFF0B2D2F" />
+        <pixel index="133" colour="0xFF0B2D2F" />
+        <pixel index="134" colour="0xFF0B2D2F" />
+        <pixel index="135" colour="0xFF1A1814" />
+        <pixel index="136" colour="0xFF1A1814" />
+        <pixel index="137" colour="0xFF0B2D2F" />
+        <pixel index="138" colour="0xFF52DDFF" />
+        <pixel index="139" colour="0xFF52DDFF" />
+        <pixel index="140" colour="0xFF0B2D2F" />
+        <pixel index="141" colour="0xFF1A1814" />
+        <pixel index="142" colour="0xFF1A1814" />
+        <pixel index="143" colour="0xFF002123" />
+        <pixel index="144" colour="0xFF1687C1" />
+        <pixel index="145" colour="0xFF1687C1" />
+        <pixel index="146" colour="0xFF002123" />
+        <pixel index="147" colour="0xFF1A1814" />
+        <pixel index="148" colour="0xFF1A1814" />
+        <pixel index="149" colour="0xFF3208DA" />
+        <pixel index="150" colour="0xFF1A1814" />
+        <pixel index="151" colour="0xFF1A1814" />
+        <pixel index="152" colour="0xFF0B2D2F" />
+        <pixel index="153" colour="0xFF52DDFF" />
+        <pixel index="154" colour="0xFF52DDFF" />
+        <pixel index="155" colour="0xFF0B2D2F" />
+        <pixel index="156" colour="0xFF1A1814" />
+        <pixel index="157" colour="0xFF1A1814" />
+        <pixel index="158" colour="0xFF002123" />
+        <pixel index="159" colour="0xFF1687C1" />
+        <pixel index="160" colour="0xFF1687C1" />
+        <pixel index="161" colour="0xFF002123" />
+        <pixel index="162" colour="0xFF1A1814" />
+        <pixel index="163" colour="0xFF1A1814" />
+        <pixel index="164" colour="0xFF3208DA" />
+        <pixel index="165" colour="0xFF0B2D2F" />
+        <pixel index="166" colour="0xFF0B2D2F" />
+        <pixel index="167" colour="0xFF0B2D2F" />
+        <pixel index="168" colour="0xFF0B2D2F" />
+        <pixel index="169" colour="0xFF0B2D2F" />
+        <pixel index="170" colour="0xFF0B2D2F" />
+        <pixel index="171" colour="0xFF0B2D2F" />
+        <pixel index="172" colour="0xFF0B2D2F" />
+        <pixel index="173" colour="0xFF0B2D2F" />
+        <pixel index="174" colour="0xFF0B2D2F" />
+        <pixel index="175" colour="0xFF0B2D2F" />
+        <pixel index="176" colour="0xFF0B2D2F" />
+        <pixel index="177" colour="0xFF0B2D2F" />
+        <pixel index="178" colour="0xFF0B2D2F" />
+        <pixel index="179" colour="0xFF0B2D2F" />
+        <pixel index="180" colour="0xFF1687C1" />
+        <pixel index="181" colour="0xFF1687C1" />
+        <pixel index="182" colour="0xFF0B2D2F" />
+        <pixel index="183" colour="0xFF96B0B7" />
+        <pixel index="184" colour="0xFF96B0B7" />
+        <pixel index="185" colour="0xFF0B2D2F" />
+        <pixel index="186" colour="0xFF1A1814" />
+        <pixel index="187" colour="0xFF1A1814" />
+        <pixel index="188" colour="0xFF0B2D2F" />
+        <pixel index="189" colour="0xFF1A1814" />
+        <pixel index="190" colour="0xFF1A1814" />
+        <pixel index="191" colour="0xFF002123" />
+        <pixel index="192" colour="0xFF1A1814" />
+        <pixel index="193" colour="0xFF1A1814" />
+        <pixel index="194" colour="0xFF3208DA" />
+        <pixel index="195" colour="0xFF1687C1" />
+        <pixel index="196" colour="0xFF1687C1" />
+        <pixel index="197" colour="0xFF0B2D2F" />
+        <pixel index="198" colour="0xFF96B0B7" />
+        <pixel index="199" colour="0xFF96B0B7" />
+        <pixel index="200" colour="0xFF0B2D2F" />
+        <pixel index="201" colour="0xFF1A1814" />
+        <pixel index="202" colour="0xFF1A1814" />
+        <pixel index="203" colour="0xFF0B2D2F" />
+        <pixel index="204" colour="0xFF1A1814" />
+        <pixel index="205" colour="0xFF1A1814" />
+        <pixel index="206" colour="0xFF002123" />
+        <pixel index="207" colour="0xFF1A1814" />
+        <pixel index="208" colour="0xFF1A1814" />
+        <pixel index="209" colour="0xFF3208DA" />
+        <pixel index="210" colour="0xFF0B2D2F" />
+        <pixel index="211" colour="0xFF0B2D2F" />
+        <pixel index="212" colour="0xFF0B2D2F" />
+        <pixel index="213" colour="0xFF0B2D2F" />
+        <pixel index="214" colour="0xFF0B2D2F" />
+        <pixel index="215" colour="0xFF0B2D2F" />
+        <pixel index="216" colour="0xFF0B2D2F" />
+        <pixel index="217" colour="0xFF0B2D2F" />
+        <pixel index="218" colour="0xFF0B2D2F" />
+        <pixel index="219" colour="0xFF0B2D2F" />
+        <pixel index="220" colour="0xFF0B2D2F" />
+        <pixel index="221" colour="0xFF0B2D2F" />
+        <pixel index="222" colour="0xFF0B2D2F" />
+        <pixel index="223" colour="0xFF0B2D2F" />
+        <pixel index="224" colour="0xFF0B2D2F" />
+    </pixels>
+</display>
+*/
