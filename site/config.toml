@@ -1,10 +1,12 @@
 # Site settings
+publishDir = "../docs"
 baseurl = "/"
 languageCode = "en-us"
-title = "Okkur - Syna"
+title = "Seqoli"
 theme = "syna"
 enableGitInfo = true
 version = "0.17.2"
+
 
 # Google Analytics tracking
 googleAnalytics = ""
