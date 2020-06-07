@@ -17,8 +17,12 @@ url     = "userguide"
 weight  = 3
 [[menu.main]]
 name    = "Download"
-url     = "gallery"
+url     = "https://gumroad.com/l/seqoli"
 weight  = 4
+[[menu.main]]
+name    = "GitHub"
+url     = "https://github.com/SuuBro/Seqoli"
+weight  = 5
 
 # Site Params
 [params]
@@ -36,19 +40,18 @@ contactFormAction = "#" # contact form works with https://formspree.io
 # Banner Section
 [params.banner]
 enable  = true
-bgImage = "images/slider.jpg"
+headerImg = "images/logo_black.png"
 heading = "Seqoli"
 description = "The open-source MIDI sequencer for ROLI Blocks"
-# button
 btn     = true
 btnText = "Download Now"
-btnURL  = "https://themefisher.com/"
+btnURL  = "https://gumroad.com/l/seqoli"
 
 # flip text
 #[[params.banner.flipText]]
 #title   = "Open Source"
 [[params.banner.flipText]]
-title   = "MIDI Sequencer"
+title   = "Tactile MIDI Sequencer"
 #[[params.banner.flipText]]
 #title   = "Expandable"
 
