@@ -2,7 +2,7 @@ baseURL = "https://suubro.github.io/Seqoli/"
 publishDir = "../docs/"
 languageCode = "en"
 title = "Seqoli/"
-theme = "timer-hugo"
+theme = "html"
 
 # We Used Ionicons Icon font for Icon, for more details check this link - https://ionicons.com/
 
