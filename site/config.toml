@@ -1,6 +1,6 @@
 # Site settings
 publishDir = "../docs"
-baseurl = "/"
+baseurl = "Seqoli/"
 languageCode = "en-us"
 title = "Seqoli"
 theme = "syna"
