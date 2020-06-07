@@ -1,3 +1,6 @@
 [submodule "site/themes/syna"]
 	path = site/themes/syna
 	url = https://git.okkur.org/syna
+[submodule "site/themes/timer-hugo"]
+	path = site/themes/timer-hugo
+	url = https://github.com/themefisher/timer-hugo.git
