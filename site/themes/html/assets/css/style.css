@@ -290,7 +290,7 @@ a:hover {
   background-position: center center;
   background-size: cover;
   background-attachment: fixed;
-  padding: 130px;
+  padding-top: 130px;
   padding-bottom: 50px;
   color: #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
@@ -1302,6 +1302,11 @@ article {
 
 .cd-headline.slide .cd-words-wrapper {
   color: #2cbba3;
+}
+
+.cd-headline.slide b.is-visible {
+  white-space: pre-wrap;
+  text-align: center;
 }
 
 ul.social-icons {
