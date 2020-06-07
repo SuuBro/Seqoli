@@ -3,6 +3,7 @@ baseurl = "https://suubro.github.io/Seqoli/"
 languageCode = "en"
 title = "Seqoli"
 theme = "hugo-vex"
+publishDir = "../docs"
 
 #################################### Plugins ##########################################
 
