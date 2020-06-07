@@ -1,3 +1,3 @@
 Coming Soon...
 
-This is a <a href="https://gumroad.com/l/KqZoP">Pay-What-You-Want</a> product.
+Get it <a href="https://gumroad.com/l/KqZoP">Here</a>.
