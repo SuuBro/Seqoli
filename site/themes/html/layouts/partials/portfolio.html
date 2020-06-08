@@ -3,14 +3,14 @@
 <section id="works" class="works">
     <div class="container">
         <div class="section-heading">
-            {{ with .Site.Params.portfolio.title }}<h1 class="title wow fadeInDown" data-wow-delay=".3s">{{ . }}</h1>{{ end }}
-            {{ with .Site.Params.portfolio.subtitle }}<p class="wow fadeInDown" data-wow-delay=".5s">{{ . }}</p>{{ end }}
+            {{ with .Site.Params.portfolio.title }}<h1 class="title wow fadeInDown" data-wow-delay=".2s">{{ . }}</h1>{{ end }}
+            {{ with .Site.Params.portfolio.subtitle }}<p class="wow fadeInDown" data-wow-delay=".3s">{{ . }}</p>{{ end }}
         </div>
         <div class="row">
             {{ range $index, $element:= where .Site.RegularPages "Type" "portfolio" }}
             <div class="col-md-4 col-sm-6">
                 {{ $delay := mul $index 300 }}
-                <figure class="wow fadeInLeft animated portfolio-item" data-wow-duration="500ms" data-wow-delay="{{ $delay }}ms">
+                <figure class="wow fadeInLeft animated portfolio-item" data-wow-duration="200ms" data-wow-delay="{{ $delay }}ms">
                     <div class="img-wrapper">
                         <img src="{{ .Params.Image | relURL }}" class="img-fluid" alt="this is a title">
                         <div class="overlay">

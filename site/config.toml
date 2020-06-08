@@ -7,14 +7,14 @@ theme = "html"
 # We Used Ionicons Icon font for Icon, for more details check this link - https://ionicons.com/
 
 # Navbar Menus
-[[menu.main]]
-name    = "Features"
-url     = "features"
-weight  = 2
-[[menu.main]]
-name    = "User Guide"
-url     = "userguide"
-weight  = 3
+#[[menu.main]]
+#name    = "Features"
+#url     = "features"
+#weight  = 2
+#[[menu.main]]
+#name    = "User Guide"
+#url     = "userguide"
+#weight  = 3
 [[menu.main]]
 name    = "Download"
 url     = "https://gumroad.com/l/seqoli"
@@ -65,26 +65,26 @@ image   = "images/Example.png"
 # Call to Action
 [params.cta]
 enable  = true
-title   = "SO WHAT YOU THINK ?"
-content = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis,<br>possimus commodi, fugiat magnam temporibus vero magni recusandae? Dolore, maxime praesentium."
-btnText = "Contact with me"
-btnURL  = "/contact"
+title   = "Feedback and Feature Requests"
+content = "Seqoli is just getting going so I'd love to hear your thoughts. Reach out to me on Github..."
+btnText = "Get in Touch"
+btnURL  = "https://github.com/SuuBro/Seqoli/issues/new"
 
 # Portfolio Section On Homepage
 [params.portfolio]
 enable  = true
-title   = "Latest Works"
-subtitle= "Aliquam lobortis. Maecenas vestibulum mollis diam. Pellentesque auctor neque nec urna. Nulla sit amet est. Aenean posuere tortor sed cursus feugiat, nunc augue blandit nunc, eu sollicitudin urna dolor sagittis lacus."
+title   = "Alpha Release Available Now"
+subtitle= "Seqoli is a work in-progress. Watch this space for documentation and new features."
 
 # social icon
-[[params.socialIcon]]
-icon = "ion-social-facebook"
-url = "#"
+#[[params.socialIcon]]
+#icon = "ion-social-facebook"
+#url = "#"
 
-[[params.socialIcon]]
-icon = "ion-social-instagram"
-url = "#"
+#[[params.socialIcon]]
+#icon = "ion-social-instagram"
+#url = "#"
 
 [[params.socialIcon]]
 icon = "ion-social-linkedin"
-url = "#"
+url = "https://www.linkedin.com/in/jsubramaniam/"

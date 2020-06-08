@@ -4,10 +4,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12 text-center">
-                <div class="block wow fadeInUp" data-wow-delay=".3s">
+                <div class="block wow fadeInUp" data-wow-delay=".3s" data-wow-duration="300ms">
                     {{ "<!-- Slider -->" | safeHTML}}
                     <section class="cd-intro">
-                        <h1 class="wow fadeInUp animated cd-headline slide" data-wow-delay=".4s">
+                        <h1 class="wow fadeInUp animated cd-headline slide" data-wow-delay=".4s" data-wow-duration="400ms">
                             {{ with .Site.Params.banner.headerImg }}<img style="max-width: -webkit-fill-available" src="{{ . | absURL }}">{{ end }}
                             <br>
                             <span class="cd-words-wrapper">
@@ -21,7 +21,7 @@
                             </span>
                         </h1>
                     </section>
-                    {{ with .Site.Params.banner.description }}<h2 class="wow fadeInUp animated" data-wow-delay=".5s">{{ . }}</h2>{{ end }}
+                    {{ with .Site.Params.banner.description }}<h2 class="wow fadeInUp animated" data-wow-delay=".5s" data-wow-duration="500ms">{{ . }}</h2>{{ end }}
                     {{ if .Site.Params.banner.btn }}                    
                         <a class="wow fadeInUp animated btn btn-default" data-wow-delay=".6s"
                             href="{{ .Site.Params.banner.btnURL }}" target="_blank">{{ .Site.Params.banner.btnText }}</a>
