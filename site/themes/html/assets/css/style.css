@@ -424,7 +424,7 @@ a:hover {
 }
 
 #about .block img {
-  max-width: 100%;
+  max-width: 400px;
 }
 
 .about-feature .block {

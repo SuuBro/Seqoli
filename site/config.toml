@@ -59,8 +59,8 @@ title   = "Tactile MIDI Sequencer"
 [params.about]
 enable  = true
 title   = "ABOUT SEQOLI"
-content = "Hello, I’m a UI/UX Designer & Front End Developer from Victoria, Australia. I hold a master degree of Web Design from the World University.And scrambled it to make a type specimen book. It has survived not only five centuries. <br> <br> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error, adipisci voluptatum repudiandae, natus impedit repellat aut officia illum at assumenda iusto reiciendis placeat. Temporibus, vero."
-image   = "images/about/about.jpg"
+content = "Seqoli is a 'DAW-less' midi sequencer interface designed to run on one or more ROLI Lightpad BLOCKS. Drawing inspiration from Monome grid, Seqoli is great for creating polyrhythms on the fly or sequencing an entire track. Snap together multiple Lightpad BLOCKS to extend your sequencer length and/or track count."
+image   = "images/Example.png"
 
 # Call to Action
 [params.cta]
