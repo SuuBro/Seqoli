@@ -42,7 +42,7 @@ contactFormAction = "#" # contact form works with https://formspree.io
 enable  = true
 headerImg = "images/logo_black.png"
 heading = "Seqoli"
-description = "The open-source MIDI sequencer for ROLI Blocks"
+description = "An open-source project for ROLI Blocks"
 btn     = true
 btnText = "Download Now"
 btnURL  = "https://gumroad.com/l/seqoli"
@@ -58,7 +58,7 @@ title   = "Tactile MIDI Sequencer"
 # Homepage About Section
 [params.about]
 enable  = true
-title   = "ABOUT ME"
+title   = "ABOUT SEQOLI"
 content = "Hello, I’m a UI/UX Designer & Front End Developer from Victoria, Australia. I hold a master degree of Web Design from the World University.And scrambled it to make a type specimen book. It has survived not only five centuries. <br> <br> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error, adipisci voluptatum repudiandae, natus impedit repellat aut officia illum at assumenda iusto reiciendis placeat. Temporibus, vero."
 image   = "images/about/about.jpg"
 
