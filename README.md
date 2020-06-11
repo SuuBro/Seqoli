@@ -1,6 +1,5 @@
-<img align="center" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/logo.png" alt="Seqoli">
-
 <div align="center">
+  <img align="center" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/logo.png" alt="Seqoli">
   <strong>A tactile, open-source MIDI sequencer for ROLI lightpad blocks</strong>
 </div>
 
