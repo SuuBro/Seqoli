@@ -1,4 +1,4 @@
-<h1 align="center">Seqoli</h1>
+<img align="center" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/logo.png" alt="Seqoli">
 
 <div align="center">
   <strong>A tactile, open-source MIDI sequencer for ROLI lightpad blocks</strong>
