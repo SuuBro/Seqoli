@@ -1,12 +1,33 @@
-# Seqoli
+<h1 align="center">Seqoli</h1>
 
-An open-source MIDI sequencer for ROLI blocks.
+<div align="center">
+  <strong>A tactile, open-source MIDI sequencer for ROLI lightpad blocks</strong>
+</div>
 
-Development Stage: **ALPHA**
+<br />
 
-Expect some bugs, but also expect them to be fixed! Also expect plenty more features to come- requests welcome [here](https://github.com/SuuBro/Seqoli/issues).
+<div align="center">
+  <sub>Written by 
+  <a href="https://www.linkedin.com/in/jsubramaniam/">Joshua Subramaniam</a> and
+  <a href="https://github.com/SuuBro/Seqoli/graphs/contributors">
+    contributors
+  </a>
+</div>
 
-### Documentation
+## Table of Contents
+- [Summary](#summary)
+- [Installation](#installation)
+- [User Guide](#user-guide)
+
+## Summary
+Seqoli is a 'DAW-less' midi sequencer interface designed to run on one or more ROLI Lightpad BLOCKS. Drawing inspiration from Monome grid, Seqoli is great for creating polyrhythms on the fly or sequencing an entire track. Snap together multiple Lightpad BLOCKS to extend your sequencer length and/or track count.
+
+
+## Installation
+Work is in-progress! Watch this space...
+
+
+## User Guide
 Work is in-progress! Watch this space...
 
 
