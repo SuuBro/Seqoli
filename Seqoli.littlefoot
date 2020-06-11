@@ -28,6 +28,8 @@
 </metadata>
 */
 
+#include "../LittleFootLibrary/ClusterSync.littlefoot"
+
 const int GMSG_ADVANCE = 118;
 const int MSG_VELOCITY = 148;
 const int MSG_POSITION = 149;
@@ -111,8 +113,28 @@ int trackToNote(int track)
     return t4_note;
 }
 
+int trackToChannel(int track)
+{
+    if(track == 0) { return t0_ch; }
+    if(track == 1) { return t1_ch; }
+    if(track == 2) { return t2_ch; }
+    if(track == 3) { return t3_ch; }
+    return t4_ch;
+}
+
 void initialise()
 {   
+    ClusterSync_initialise();
+    resetState();   
+}
+
+void ClusterSync_Overrride_clusterChanged()
+{
+    resetState();
+}
+
+void resetState()
+{
     for (int i = 0; i < 32; ++i)
         setLocalConfigActiveState (i, false, false);
         
@@ -173,7 +195,7 @@ void step()
             int trackLength = getTrackLength(t);
             int initialPosition = getPosition(t);
             
-            sendNoteOff(2, note, 0);
+            sendNoteOff(trackToChannel(t)-1, note, 0);
             
             int newPosition;         
             if(trackLength == 0)
@@ -191,7 +213,7 @@ void step()
             int velocity = getVelocity(t, newPosition);
             if(velocity > 0)
             {
-                sendNoteOn(2, note, velocity);    
+                sendNoteOn(trackToChannel(t)-1, note, velocity);    
             }            
         }        
     }
@@ -336,7 +358,8 @@ int posToX(int pos)
 }
 
 void repaint()
-{    
+{   
+    ClusterSync_sync();
     advance();
     clearDisplay();
 
