@@ -4,8 +4,6 @@
   <strong>A tactile, open-source MIDI sequencer for ROLI lightpad blocks</strong>
 </div>
 
-<br />
-
 <div align="center">
   <sub>Written by 
   <a href="https://www.linkedin.com/in/jsubramaniam/">Joshua Subramaniam</a> and
