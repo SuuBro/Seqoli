@@ -32,7 +32,11 @@ Seqoli is a 'DAW-less' midi sequencer interface designed to run on one or more R
 
 
 ## User Guide
-Work is in-progress! Watch this space...
+
+### Interface
+
+Seqoli has up to 5 tracks on each block, with up to 5 positions each, as shown below:
+<img align="center" height="350px" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/Layout.png" alt="Seqoli">
 
 
 
