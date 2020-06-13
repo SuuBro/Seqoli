@@ -36,7 +36,15 @@ Seqoli is a 'DAW-less' midi sequencer interface designed to run on one or more R
 ### Interface
 
 Seqoli has up to 5 tracks on each block, with up to 5 positions each, as shown below:
-<img align="center" height="350px" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/Layout.png" alt="Seqoli">
+
+<img align="center" width="350px" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/Layout.png" alt="Seqoli">
+
+
+Each track has it's own current position. This will advance one place to the right with each beat, according to the BPM.
+
+To send MIDI notes to your instrument, you can press each position within a track to enable it. 
+
+<img align="center" width="350px" src="https://raw.githubusercontent.com/SuuBro/Seqoli/master/site/static/images/Track.png" alt="Seqoli">
 
 
 
