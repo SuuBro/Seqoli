@@ -70,12 +70,6 @@ content = "Seqoli is just getting going so I'd love to hear your thoughts. Reach
 btnText = "Get in Touch"
 btnURL  = "https://github.com/SuuBro/Seqoli/issues/new"
 
-# Portfolio Section On Homepage
-[params.portfolio]
-enable  = true
-title   = "Alpha Release Available Now"
-subtitle= "Seqoli is a work in-progress. Watch this space for documentation and new features."
-
 # social icon
 #[[params.socialIcon]]
 #icon = "ion-social-facebook"
