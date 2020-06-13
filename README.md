@@ -54,6 +54,7 @@ When the current position encounters an enabled-note, a MIDI meesage is emmitted
 
 When the position reaches the track-end marker it will loop back to the beginning. The track-end marker can be moved by pressing and sliding it. Alternatively you can press-and-hold it, and use another finger to press somewhere else on the same track.
 
+### Configuration
 
 The midi channels and note values for each track can be configured in the ROLI Dashboard. Note that the left-most block for a given track is responsible for defining the midi channel and note for the entire track, regardless of how many BLOCKS are in the row.
 
