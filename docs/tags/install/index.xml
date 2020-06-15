@@ -1,27 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>install on Seqoli</title>
-    <link>https://suubro.github.io/Seqoli/tags/install/</link>
-    <description>Recent content in install on Seqoli</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en</language>
-    <lastBuildDate>Sun, 08 Jul 2018 12:22:40 +0600</lastBuildDate>
-    
-	<atom:link href="https://suubro.github.io/Seqoli/tags/install/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    <item>
-      <title>How To Setup Timer Hugo</title>
-      <link>https://suubro.github.io/Seqoli/blog/installation/</link>
-      <pubDate>Sun, 08 Jul 2018 12:22:40 +0600</pubDate>
-      
-      <guid>https://suubro.github.io/Seqoli/blog/installation/</guid>
-      <description>Install this template by following those simple steps: STEP-1 : Hugo installation Check this link below for install hugo on your computer. hugo install documentation
-STEP-2 : Create your project Hugo provides a new command to create a new website.
-hugo new site &amp;lt;new_project&amp;gt;STEP-3 : Install the theme Run this command
-hugo new site timer-hugoand then go to the themes folder inside of timer-hugo folder. You can also use this command cd timer-hugo/themes for going to this folder.</description>
-    </item>
-    
-  </channel>
-</rss>
