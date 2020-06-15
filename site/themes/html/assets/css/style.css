@@ -333,7 +333,7 @@ a:hover {
   margin-top: 25px;
 }
 
-#hero-area .btn {
+.btn {
   background: #414141;
   border: none;
   color: #fff;
@@ -347,8 +347,9 @@ a:hover {
   border-radius: 0;
 }
 
-#hero-area .btn:hover {
+.btn:hover {
   background: #2cbba3;
+  color: #fff;
 }
 
 #call-to-action {
