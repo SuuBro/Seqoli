@@ -30,7 +30,7 @@ home = "Home"
 logo = "images/logo.png"
 dateFormat = "6 January 2006"
 # Meta data
-description = "Airspace Hugo theme"
+description = "An open-source MIDI sequencer for ROLI Blocks"
 author = "SuuBro"
 # Google Analitycs
 googleAnalitycsID = "Your ID"
